@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finanças Pessoais</title>
+    <meta name="theme-color" content="#0b1020" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon-192.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <section id="auth-screen" class="auth-screen">
+      <article class="card auth-card">
+        <h2>Finanças Pessoais - Login</h2>
+        <p class="muted">Entre para salvar seus dados no banco.</p>
+        <form id="form-login" class="form-grid">
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="password" type="password" placeholder="Senha" required />
+          <button type="submit">Entrar</button>
+        </form>
+        <form id="form-register" class="form-grid">
+          <input name="name" placeholder="Nome" required />
+          <input name="email" type="email" placeholder="Email" required />
+          <input name="password" type="password" placeholder="Senha (min 6)" required />
+          <button type="submit">Criar conta</button>
+        </form>
+        <p id="auth-message" class="muted"></p>
+      </article>
+    </section>
+
+    <div class="app-shell hidden" id="app-shell">
+      <aside class="sidebar">
+        <h1>Finanças Pessoais</h1>
+        <nav>
+          <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+          <button class="tab-btn" data-tab="contas">Contas e Cartoes</button>
+          <button class="tab-btn" data-tab="transacoes">Transacoes</button>
+          <button class="tab-btn" data-tab="orcamentos">Orcamentos</button>
+          <button class="tab-btn" data-tab="metas">Metas</button>
+          <button class="tab-btn" data-tab="investimentos">Investimentos</button>
+          <button class="tab-btn" data-tab="assinaturas">Assinaturas</button>
+          <button class="tab-btn" data-tab="relatorios">Relatorios</button>
+          <button class="tab-btn" data-tab="configuracoes">Configuracoes</button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <h2 id="screen-title">Dashboard</h2>
+          <div class="actions">
+            <button id="install-pwa" class="hidden">Instalar app</button>
+            <button id="logout-btn">Sair</button>
+            <button id="seed-data">Popular exemplo</button>
+            <button id="export-data">Exportar JSON</button>
+            <label class="import-label">
+              Importar JSON
+              <input id="import-data" type="file" accept="application/json" />
+            </label>
+          </div>
+        </header>
+
+        <section id="dashboard" class="screen active">
+          <div class="cards-grid">
+            <article class="card kpi">
+              <h3>Saldo Total</h3>
+              <p id="kpi-saldo">R$ 0,00</p>
+            </article>
+            <article class="card kpi">
+              <h3>Receitas no mes</h3>
+              <p id="kpi-receitas">R$ 0,00</p>
+            </article>
+            <article class="card kpi">
+              <h3>Despesas no mes</h3>
+              <p id="kpi-despesas">R$ 0,00</p>
+            </article>
+            <article class="card kpi">
+              <h3>Taxa de poupanca</h3>
+              <p id="kpi-poupanca">0%</p>
+            </article>
+            <article class="card kpi">
+              <h3>Score financeiro</h3>
+              <p id="kpi-score">0</p>
+            </article>
+          </div>
+          <article class="card">
+            <h3>Insights inteligentes</h3>
+            <ul id="insights"></ul>
+          </article>
+          <article class="card">
+            <h3>Alertas inteligentes</h3>
+            <ul id="alertas-inteligentes" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Projecao de saldo (6 meses)</h3>
+            <ul id="projecao-saldo" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="contas" class="screen">
+          <article class="card">
+            <h3>Conta ou cartao</h3>
+            <form id="form-conta" class="form-grid">
+              <input type="hidden" name="editId" />
+              <input name="nome" placeholder="Nome (ex: Nubank, Itau, Visa)" required />
+              <select name="tipo" required>
+                <option value="conta">Conta</option>
+                <option value="cartao">Cartao</option>
+              </select>
+              <input name="limite" type="number" step="0.01" min="0" placeholder="Limite do cartao (opcional)" />
+              <input name="saldo" type="number" step="0.01" placeholder="Saldo/fatura atual" required />
+              <button type="submit" id="submit-conta">Salvar</button>
+              <button type="button" id="cancelar-edicao-conta">Cancelar edicao</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Resumo de cartoes</h3>
+            <ul class="list">
+              <li><span>Limite total</span><span id="cartoes-limite-total">R$ 0,00</span></li>
+              <li><span>Valor gasto</span><span id="cartoes-gasto-total">R$ 0,00</span></li>
+              <li><span>Disponivel</span><span id="cartoes-disponivel-total">R$ 0,00</span></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Resumo de contas</h3>
+            <ul id="lista-contas" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="transacoes" class="screen">
+          <article class="card">
+            <h3>Filtros avancados</h3>
+            <form id="filtros-transacoes" class="form-grid">
+              <select name="tipo">
+                <option value="">Todos os tipos</option>
+                <option value="despesa">Despesa</option>
+                <option value="receita">Receita</option>
+              </select>
+              <input name="categoria" placeholder="Categoria" />
+              <input name="conta" placeholder="Conta" />
+              <input name="dataInicio" type="date" />
+              <input name="dataFim" type="date" />
+              <button type="submit">Aplicar filtros</button>
+              <button type="button" id="limpar-filtros">Limpar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Novo lancamento</h3>
+            <form id="form-transacao" class="form-grid">
+              <select name="tipo" id="transacao-tipo" required>
+                <option value="despesa">Despesa</option>
+                <option value="receita">Receita</option>
+              </select>
+              <input name="descricao" placeholder="Descricao" required />
+              <select name="categoria" id="transacao-categoria" required></select>
+              <select name="conta" id="transacao-conta" required></select>
+              <input name="valor" type="number" step="0.01" min="0.01" required />
+              <input name="data" type="date" required />
+              <button type="submit">Salvar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Historico</h3>
+            <ul id="lista-transacoes" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Edicao de lancamento</h3>
+            <form id="form-editar-transacao" class="form-grid">
+              <input name="id" placeholder="ID da transacao" required />
+              <select name="tipo" id="editar-transacao-tipo" required>
+                <option value="despesa">Despesa</option>
+                <option value="receita">Receita</option>
+              </select>
+              <input name="descricao" placeholder="Descricao" required />
+              <select name="categoria" id="editar-transacao-categoria" required></select>
+              <select name="conta" id="editar-transacao-conta" required></select>
+              <input name="valor" type="number" step="0.01" min="0.01" required />
+              <input name="data" type="date" required />
+              <button type="submit">Salvar edicao</button>
+            </form>
+          </article>
+        </section>
+
+        <section id="orcamentos" class="screen">
+          <article class="card">
+            <h3>Novo orcamento por categoria</h3>
+            <form id="form-orcamento" class="form-grid">
+              <input name="categoria" placeholder="Categoria" required />
+              <input name="limite" type="number" step="0.01" min="1" placeholder="Limite mensal" required />
+              <button type="submit">Salvar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Controle de orcamentos</h3>
+            <ul id="lista-orcamentos" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="metas" class="screen">
+          <article class="card">
+            <h3>Nova meta financeira</h3>
+            <form id="form-meta" class="form-grid">
+              <input name="nome" placeholder="Nome da meta" required />
+              <input name="alvo" type="number" step="0.01" min="1" placeholder="Valor alvo" required />
+              <input name="atual" type="number" step="0.01" min="0" placeholder="Valor atual" required />
+              <input name="aporteMensal" type="number" step="0.01" min="0" placeholder="Aporte mensal" />
+              <button type="submit">Salvar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Metas ativas</h3>
+            <ul id="lista-metas" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Regra automatica de aporte</h3>
+            <form id="form-regra-aporte" class="form-grid">
+              <input name="metaNome" placeholder="Nome da meta (igual ao cadastro)" required />
+              <input
+                name="percentualReceita"
+                type="number"
+                step="0.1"
+                min="0.1"
+                max="100"
+                placeholder="% da receita do mes"
+                required
+              />
+              <button type="submit">Salvar regra</button>
+            </form>
+            <ul id="lista-regras-aporte" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="investimentos" class="screen">
+          <article class="card">
+            <h3>Novo investimento</h3>
+            <form id="form-investimento" class="form-grid">
+              <input name="ativo" placeholder="Ativo" required />
+              <input name="tipo" placeholder="Tipo (Acoes, FII, Renda Fixa...)" required />
+              <input name="valorAplicado" type="number" step="0.01" min="1" placeholder="Valor aplicado" required />
+              <input name="valorAtual" type="number" step="0.01" min="1" placeholder="Valor atual" required />
+              <button type="submit">Salvar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Carteira</h3>
+            <ul id="lista-investimentos" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="assinaturas" class="screen">
+          <article class="card">
+            <h3>Nova assinatura/conta recorrente</h3>
+            <form id="form-assinatura" class="form-grid">
+              <input name="nome" placeholder="Nome" required />
+              <input name="valor" type="number" step="0.01" min="1" placeholder="Valor mensal" required />
+              <input name="dia" type="number" min="1" max="31" placeholder="Dia de cobranca" required />
+              <button type="submit">Salvar</button>
+            </form>
+          </article>
+          <article class="card">
+            <h3>Recorrencias</h3>
+            <ul id="lista-assinaturas" class="list"></ul>
+          </article>
+        </section>
+
+        <section id="relatorios" class="screen">
+          <article class="card">
+            <h3>Resumo por categoria (despesas)</h3>
+            <ul id="relatorio-categorias" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Resumo de investimentos</h3>
+            <ul id="relatorio-investimentos" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Fluxo mensal (receita x despesa)</h3>
+            <ul id="relatorio-fluxo" class="list"></ul>
+          </article>
+          <article class="card">
+            <h3>Grafico de saldo mensal</h3>
+            <canvas id="grafico-saldo" height="180"></canvas>
+          </article>
+        </section>
+
+        <section id="configuracoes" class="screen">
+          <article class="card">
+            <h3>Configuracoes</h3>
+            <p>Dados salvos automaticamente no navegador (localStorage).</p>
+            <button id="reset-all" class="danger">Limpar todos os dados</button>
+          </article>
+          <article class="card">
+            <h3>Categorias de despesas e receitas</h3>
+            <form id="form-categoria" class="form-grid">
+              <input type="hidden" name="oldNome" />
+              <select name="tipo" required>
+                <option value="despesa">Despesa</option>
+                <option value="receita">Receita</option>
+              </select>
+              <input name="nome" placeholder="Nome da categoria" required />
+              <button type="submit" id="submit-categoria">Adicionar categoria</button>
+              <button type="button" id="cancelar-edicao-categoria">Cancelar edicao</button>
+            </form>
+            <h4>Despesas</h4>
+            <ul id="lista-categorias-despesa" class="list"></ul>
+            <h4>Receitas</h4>
+            <ul id="lista-categorias-receita" class="list"></ul>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
